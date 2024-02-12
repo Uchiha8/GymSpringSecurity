@@ -3,11 +3,9 @@ package com.epam.finalDemo.service;
 import com.epam.finalDemo.domain.*;
 import com.epam.finalDemo.dto.request.ChangeStatusRequest;
 import com.epam.finalDemo.dto.request.TrainerRegistrationRequest;
+import com.epam.finalDemo.dto.request.TrainerTrainingsRequest;
 import com.epam.finalDemo.dto.request.UpdateTrainerProfileRequest;
-import com.epam.finalDemo.dto.response.RegistrationResponse;
-import com.epam.finalDemo.dto.response.TraineeList;
-import com.epam.finalDemo.dto.response.TrainerProfileResponse;
-import com.epam.finalDemo.dto.response.UpdateTrainerProfileResponse;
+import com.epam.finalDemo.dto.response.*;
 import com.epam.finalDemo.repository.TrainerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -60,6 +58,25 @@ public class TrainerService {
                 trainer.getTrainingType().getName(),
                 trainer.getUser().getIsActive(),
                 trainees);
+    }
+
+    public List<TrainerTrainingsResponse> getTrainings(TrainerTrainingsRequest request) {
+        var trainer = trainerRepository.findByUserUsername(request.username()).orElseThrow(
+                () -> new RuntimeException("Trainer with username " + request.username() + " not found"));
+        if (trainer.getTrainings().isEmpty()) {
+            throw new RuntimeException("Trainer with username " + request.username() + " has no trainings");
+        }
+        List<TrainerTrainingsResponse> trainings = new ArrayList<>();
+        for (Training training : trainer.getTrainings()) {
+            trainings.add(new TrainerTrainingsResponse(
+                    training.getTrainingName(),
+                    training.getTrainingDate(),
+                    training.getTrainingType().getName(),
+                    training.getDuration(),
+                    training.getTrainee().getUser().getUsername()
+            ));
+        }
+        return trainings;
     }
 
     public UpdateTrainerProfileResponse updateProfile(UpdateTrainerProfileRequest request) {

@@ -100,4 +100,16 @@ public class ValidModule {
             throw new IllegalArgumentException("Status is required");
         }
     }
+
+    public void getTrainingsTrainee(TraineeTrainingsRequest request) {
+        if (request.username() == null) {
+            throw new IllegalArgumentException("Username is required");
+        }
+    }
+
+    public void getTrainingsTrainer(TrainerTrainingsRequest request) {
+        if (request.username() == null) {
+            throw new IllegalArgumentException("Username is required");
+        }
+    }
 }

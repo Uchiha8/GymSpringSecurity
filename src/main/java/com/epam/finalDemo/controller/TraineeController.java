@@ -2,6 +2,7 @@ package com.epam.finalDemo.controller;
 
 import com.epam.finalDemo.dto.request.ChangeStatusRequest;
 import com.epam.finalDemo.dto.request.TraineeRegistrationRequest;
+import com.epam.finalDemo.dto.request.TraineeTrainingsRequest;
 import com.epam.finalDemo.dto.request.UpdateTraineeProfileRequest;
 import com.epam.finalDemo.service.TraineeService;
 import com.epam.finalDemo.utils.ValidModule;
@@ -33,6 +34,16 @@ public class TraineeController {
         try {
             validModule.getProfile(username);
             return ResponseEntity.ok(traineeService.getProfile(username));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/trainings")
+    public ResponseEntity<?> getTrainings(@RequestBody TraineeTrainingsRequest request) {
+        try {
+            validModule.getTrainingsTrainee(request);
+            return ResponseEntity.ok(traineeService.getTrainings(request.username()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

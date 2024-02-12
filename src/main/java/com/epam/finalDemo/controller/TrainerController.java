@@ -1,9 +1,6 @@
 package com.epam.finalDemo.controller;
 
-import com.epam.finalDemo.dto.request.ChangeStatusRequest;
-import com.epam.finalDemo.dto.request.TrainerRegistrationRequest;
-import com.epam.finalDemo.dto.request.UpdateTraineeProfileRequest;
-import com.epam.finalDemo.dto.request.UpdateTrainerProfileRequest;
+import com.epam.finalDemo.dto.request.*;
 import com.epam.finalDemo.service.TrainerService;
 import com.epam.finalDemo.utils.ValidModule;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +29,16 @@ public class TrainerController {
         try {
             validModule.getProfile(username);
             return ResponseEntity.ok(trainerService.getProfile(username));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/trainings")
+    public ResponseEntity<?> getTrainings(@RequestBody TrainerTrainingsRequest request) {
+        try {
+            validModule.getTrainingsTrainer(request);
+            return ResponseEntity.ok(trainerService.getTrainings(request));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

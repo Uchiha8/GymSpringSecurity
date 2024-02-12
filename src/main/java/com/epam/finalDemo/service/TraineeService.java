@@ -5,7 +5,6 @@ import com.epam.finalDemo.dto.request.ChangeStatusRequest;
 import com.epam.finalDemo.dto.request.TraineeRegistrationRequest;
 import com.epam.finalDemo.dto.request.UpdateTraineeProfileRequest;
 import com.epam.finalDemo.dto.response.*;
-import com.epam.finalDemo.repository.TokenRepository;
 import com.epam.finalDemo.repository.TraineeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -64,6 +63,25 @@ public class TraineeService {
                 trainee.getUser().getIsActive(),
                 trainerLists
         );
+    }
+
+    public List<TraineeTrainingsResponse> getTrainings(String username) {
+        var trainee = traineeRepository.findByUserUsername(username).orElseThrow(
+                () -> new RuntimeException("Trainee with username " + username + " not found"));
+        if (trainee.getTrainings().isEmpty()) {
+            throw new RuntimeException("Trainee with username " + username + " has no trainings");
+        }
+        List<TraineeTrainingsResponse> trainingLists = new ArrayList<>();
+        for (Training training : trainee.getTrainings()) {
+            trainingLists.add(new TraineeTrainingsResponse(
+                    training.getTrainingName(),
+                    training.getTrainingDate(),
+                    training.getTrainingType().getName(),
+                    training.getDuration(),
+                    training.getTrainer().getUser().getUsername()
+            ));
+        }
+        return trainingLists;
     }
 
     public UpdateTraineeProfileResponse updateProfile(UpdateTraineeProfileRequest request) {
