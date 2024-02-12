@@ -1,10 +1,9 @@
-## Gym Spring MVC REST API Application
+## Gym Spring Security Application
 
 ### How to run
 
-* Configure java 21 version
-* Developed using PostgresSQL relational database(databse name = 'hibernate', password = #####)
-* Recommended Tomcat 10.1 server in order to deploy our artifact files
+* Configure jdk 21
+* Developed using PostgresSQL relational database(databse name = 'finaldemo', password = #####)
 
 ### Architecture of Application
 
