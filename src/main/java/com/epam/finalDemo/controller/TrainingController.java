@@ -3,6 +3,7 @@ package com.epam.finalDemo.controller;
 import com.epam.finalDemo.dto.request.PostTrainingRequest;
 import com.epam.finalDemo.service.TrainingService;
 import com.epam.finalDemo.utils.ValidModule;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ public class TrainingController {
     private final ValidModule validModule;
 
     @PostMapping("/create")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> createTraining(@RequestBody PostTrainingRequest request) {
         try {
             validModule.trainingRequest(request);

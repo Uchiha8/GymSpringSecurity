@@ -3,6 +3,7 @@ package com.epam.finalDemo.controller;
 import com.epam.finalDemo.domain.TrainingType;
 import com.epam.finalDemo.service.TrainingTypeService;
 import com.epam.finalDemo.utils.ValidModule;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +19,7 @@ public class TrainingTypeController {
     private final ValidModule validModule;
 
     @PostMapping("/register")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> save(@RequestBody TrainingType request) {
         try {
             validModule.trainingTypeRegister(request);
@@ -28,6 +30,7 @@ public class TrainingTypeController {
     }
 
     @GetMapping("/all")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getAll() {
         List<TrainingType> trainingTypes = trainingTypeService.getAll();
         if (trainingTypes.isEmpty()) {

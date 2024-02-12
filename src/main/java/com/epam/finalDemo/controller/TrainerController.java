@@ -3,6 +3,7 @@ package com.epam.finalDemo.controller;
 import com.epam.finalDemo.dto.request.*;
 import com.epam.finalDemo.service.TrainerService;
 import com.epam.finalDemo.utils.ValidModule;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ public class TrainerController {
     }
 
     @GetMapping("/profile")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getProfile(@RequestParam String username) {
         try {
             validModule.getProfile(username);
@@ -35,6 +37,7 @@ public class TrainerController {
     }
 
     @GetMapping("/trainings")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getTrainings(@RequestBody TrainerTrainingsRequest request) {
         try {
             validModule.getTrainingsTrainer(request);
@@ -45,6 +48,7 @@ public class TrainerController {
     }
 
     @PutMapping("/updateProfile")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> updateProfile(@RequestBody UpdateTrainerProfileRequest request) {
         try {
             validModule.updateProfileTrainer(request);
@@ -55,6 +59,7 @@ public class TrainerController {
     }
 
     @PatchMapping("/changeStatus")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> changeStatus(@RequestBody ChangeStatusRequest request) {
         try {
             validModule.changeStatus(request);
@@ -65,6 +70,7 @@ public class TrainerController {
     }
 
     @DeleteMapping("/delete")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> delete(@RequestParam String username) {
         try {
             validModule.delete(username);

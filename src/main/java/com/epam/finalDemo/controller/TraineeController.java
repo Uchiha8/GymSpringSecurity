@@ -6,6 +6,8 @@ import com.epam.finalDemo.dto.request.TraineeTrainingsRequest;
 import com.epam.finalDemo.dto.request.UpdateTraineeProfileRequest;
 import com.epam.finalDemo.service.TraineeService;
 import com.epam.finalDemo.utils.ValidModule;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +32,7 @@ public class TraineeController {
     }
 
     @GetMapping("/profile")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getProfile(@RequestParam String username) {
         try {
             validModule.getProfile(username);
@@ -40,6 +43,7 @@ public class TraineeController {
     }
 
     @GetMapping("/trainings")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getTrainings(@RequestBody TraineeTrainingsRequest request) {
         try {
             validModule.getTrainingsTrainee(request);
@@ -50,6 +54,7 @@ public class TraineeController {
     }
 
     @PutMapping("/updateProfile")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> updateProfile(@RequestBody UpdateTraineeProfileRequest request) {
         try {
             validModule.updateProfileTrainee(request);
@@ -60,6 +65,7 @@ public class TraineeController {
     }
 
     @PatchMapping("/changeStatus")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> changeStatus(@RequestBody ChangeStatusRequest request) {
         try {
             validModule.changeStatus(request);
@@ -70,6 +76,7 @@ public class TraineeController {
     }
 
     @DeleteMapping("/delete")
+    @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<?> delete(@RequestParam String username) {
         try {
             validModule.delete(username);
