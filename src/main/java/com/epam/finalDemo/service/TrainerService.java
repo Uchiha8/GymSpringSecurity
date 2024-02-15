@@ -23,7 +23,7 @@ public class TrainerService {
 
     public RegistrationResponse register(TrainerRegistrationRequest request) {
         User user = new User(null, request.firstName(), request.lastName(), null, null, false, Role.ROLE_ADMIN, List.of());
-        var entity = userService.register(user);
+        User entity = userService.register(user);
         TrainingType trainingType = trainingTypeService.findByName(request.trainingType());
         Trainer trainer = Trainer.builder()
                 .trainingType(trainingType)
@@ -41,7 +41,7 @@ public class TrainerService {
     }
 
     public TrainerProfileResponse getProfile(String username) {
-        var trainer = trainerRepository.findByUserUsername(username).orElseThrow(
+        Trainer trainer = trainerRepository.findByUserUsername(username).orElseThrow(
                 () -> new RuntimeException("Trainer with username " + username + " not found"));
         List<TraineeList> trainees = new ArrayList<>();
         if (!trainer.getTrainings().isEmpty()) {

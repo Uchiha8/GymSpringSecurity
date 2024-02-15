@@ -77,7 +77,7 @@ public class UserService {
         tokenRepository.save(token);
     }
 
-    private void revokeAllTokens(User user) {
+    public void revokeAllTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty()) {
             return;
@@ -102,12 +102,8 @@ public class UserService {
         return username;
     }
 
-    private boolean existsByUsername(String username) {
+    public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
-    }
-
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public String passwordGenerator() {
