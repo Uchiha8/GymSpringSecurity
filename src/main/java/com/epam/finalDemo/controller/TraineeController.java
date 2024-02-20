@@ -5,6 +5,7 @@ import com.epam.finalDemo.dto.request.TraineeRegistrationRequest;
 import com.epam.finalDemo.dto.request.TraineeTrainingsRequest;
 import com.epam.finalDemo.dto.request.UpdateTraineeProfileRequest;
 import com.epam.finalDemo.service.TraineeService;
+import com.epam.finalDemo.utils.LoggingAspect;
 import com.epam.finalDemo.utils.ValidModule;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/trainee")
 @RequiredArgsConstructor
 public class TraineeController {
-
     private final TraineeService traineeService;
     private final ValidModule validModule;
 
@@ -58,6 +58,7 @@ public class TraineeController {
     public ResponseEntity<?> updateProfile(@RequestBody UpdateTraineeProfileRequest request) {
         try {
             validModule.updateProfileTrainee(request);
+
             return ResponseEntity.ok(traineeService.updateProfile(request));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

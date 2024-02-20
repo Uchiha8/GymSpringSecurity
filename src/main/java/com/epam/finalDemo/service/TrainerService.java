@@ -20,7 +20,7 @@ public class TrainerService {
     private final UserService userService;
     private final JwtService jwtService;
     private final TrainingTypeService trainingTypeService;
-
+//TODO fix training type existense check
     public RegistrationResponse register(TrainerRegistrationRequest request) {
         User user = new User(null, request.firstName(), request.lastName(), null, null, false, Role.ROLE_ADMIN, List.of());
         User entity = userService.register(user);
