@@ -81,4 +81,16 @@ public class TrainerController {
         }
     }
 
+    @GetMapping("/schedule")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> getSchedule(@RequestParam String username) {
+        try {
+            validModule.getSchedule(username);
+            return ResponseEntity.ok(trainerService.getSchedule(username));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
 }

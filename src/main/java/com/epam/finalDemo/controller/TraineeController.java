@@ -5,13 +5,10 @@ import com.epam.finalDemo.dto.request.TraineeRegistrationRequest;
 import com.epam.finalDemo.dto.request.TraineeTrainingsRequest;
 import com.epam.finalDemo.dto.request.UpdateTraineeProfileRequest;
 import com.epam.finalDemo.service.TraineeService;
-import com.epam.finalDemo.utils.LoggingAspect;
 import com.epam.finalDemo.utils.ValidModule;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -48,6 +45,16 @@ public class TraineeController {
         try {
             validModule.getTrainingsTrainee(request);
             return ResponseEntity.ok(traineeService.getTrainings(request.username()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/cancelTraining")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> cancelTraining(@RequestParam String username, @RequestParam String trainingName) {
+        try {
+            return ResponseEntity.ok(traineeService.cancelTraining(username, trainingName));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

@@ -19,6 +19,6 @@ public class Trainer {
     private TrainingType trainingType;
     @OneToOne(cascade = CascadeType.ALL)
     private User user;
-    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "trainer")
     private List<Training> trainings;
 }

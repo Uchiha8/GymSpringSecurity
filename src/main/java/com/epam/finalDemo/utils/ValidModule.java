@@ -112,4 +112,10 @@ public class ValidModule {
             throw new IllegalArgumentException("Username is required");
         }
     }
+
+    public void getSchedule(String username) {
+        if (username == null) {
+            throw new IllegalArgumentException("Username is required");
+        }
+    }
 }

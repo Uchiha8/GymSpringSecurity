@@ -1,5 +1,6 @@
 package com.epam.finalDemo.service;
 
+import com.epam.finalDemo.client.TrainerClient;
 import com.epam.finalDemo.domain.*;
 import com.epam.finalDemo.dto.request.ChangeStatusRequest;
 import com.epam.finalDemo.dto.request.TrainerRegistrationRequest;
@@ -20,7 +21,8 @@ public class TrainerService {
     private final UserService userService;
     private final JwtService jwtService;
     private final TrainingTypeService trainingTypeService;
-//TODO fix training type existense check
+    private final TrainerClient client;
+
     public RegistrationResponse register(TrainerRegistrationRequest request) {
         User user = new User(null, request.firstName(), request.lastName(), null, null, false, Role.ROLE_ADMIN, List.of());
         User entity = userService.register(user);
@@ -123,5 +125,13 @@ public class TrainerService {
         trainer.getUser().setIsActive(request.status());
         trainerRepository.save(trainer);
         return true;
+    }
+
+    public Schedule getSchedule(String username) {
+        Schedule schedule = client.getSchedule(username);
+        if (schedule == null) {
+            throw new RuntimeException("Trainer with username " + username + " not found");
+        }
+        return schedule;
     }
 }

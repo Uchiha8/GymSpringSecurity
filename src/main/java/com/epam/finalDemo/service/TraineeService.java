@@ -16,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TraineeService {
     private final TraineeRepository traineeRepository;
+    private final TrainingService trainingService;
     private final UserService userService;
     private final JwtService jwtService;
 
@@ -82,6 +83,22 @@ public class TraineeService {
             ));
         }
         return trainingLists;
+    }
+
+    public List<TraineeTrainingsResponse> cancelTraining(String username, String trainingName) {
+        var trainee = traineeRepository.findByUserUsername(username).orElseThrow(
+                () -> new RuntimeException("Trainee with username " + username + " not found"));
+        if (trainee.getTrainings().isEmpty()) {
+            throw new RuntimeException("Trainee with username " + username + " has no trainings");
+        }
+        Training training = trainee.getTrainings().stream()
+                .filter(t -> t.getTrainingName().equals(trainingName))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Training with name " + trainingName + " not found"));
+        trainee.getTrainings().remove(training);
+        trainingService.updateTrainingTrainee(training);
+        traineeRepository.save(trainee);
+        return getTrainings(username);
     }
 
     public UpdateTraineeProfileResponse updateProfile(UpdateTraineeProfileRequest request) {

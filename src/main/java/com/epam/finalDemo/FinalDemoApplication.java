@@ -1,12 +1,9 @@
 package com.epam.finalDemo;
 
-import com.epam.finalDemo.domain.Role;
-import com.epam.finalDemo.domain.User;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-
+import org.springframework.cloud.openfeign.EnableFeignClients;
+@EnableFeignClients
 @SpringBootApplication
 public class FinalDemoApplication {
 

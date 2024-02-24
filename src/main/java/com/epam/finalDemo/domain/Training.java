@@ -16,13 +16,13 @@ public class Training {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Trainee trainee;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Trainer trainer;
     @Column(nullable = false)
     private String trainingName;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private TrainingType trainingType;
     @Temporal(TemporalType.DATE)
     @Column(nullable = false)

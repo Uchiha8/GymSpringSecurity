@@ -21,6 +21,6 @@ public class Trainee {
     private String address;
     @OneToOne(cascade = CascadeType.ALL)
     private User user;
-    @OneToMany(mappedBy = "trainee", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "trainee")
     private List<Training> trainings;
 }
