@@ -92,5 +92,14 @@ public class TrainerController {
         }
     }
 
-
+    @GetMapping("/test")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> test() {
+        try {
+            trainerService.test();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok("Test");
+    }
 }

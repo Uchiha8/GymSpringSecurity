@@ -20,4 +20,7 @@ public interface TrainerClient {
 
     @GetMapping("/schedule")
     Schedule getSchedule(@RequestParam String username);
+
+    @GetMapping("/test")
+    Integer test();
 }

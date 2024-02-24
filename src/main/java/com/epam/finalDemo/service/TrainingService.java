@@ -9,6 +9,7 @@ import com.epam.finalDemo.dto.request.TrainerClientDTO;
 import com.epam.finalDemo.repository.TraineeRepository;
 import com.epam.finalDemo.repository.TrainerRepository;
 import com.epam.finalDemo.repository.TrainingRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class TrainingService {
     private final TrainerRepository trainerRepository;
     private final TrainerClient client;
 
+    @CircuitBreaker(name = "trainer-service")
     public Training save(PostTrainingRequest request) {
         if (!traineeRepository.existsByUserUsername(request.traineeUsername())) {
             throw new RuntimeException("Trainee with username " + request.traineeUsername() + " not found");
@@ -44,6 +46,7 @@ public class TrainingService {
         }
     }
 
+    @CircuitBreaker(name = "trainer-service")
     public void deleteByTrainingName(String trainingName) {
         if (!trainingRepository.existsByTrainingName(trainingName)) {
             throw new RuntimeException("Training with name " + trainingName + " not found");

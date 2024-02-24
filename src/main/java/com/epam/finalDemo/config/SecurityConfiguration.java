@@ -53,6 +53,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/api/v1/trainer/profile").hasRole("ADMIN")
                                 .requestMatchers("/api/v1/trainer/schedule").hasRole("ADMIN")
                                 .requestMatchers("/api/v1/trainer/delete").hasRole("ADMIN")
+                                .requestMatchers("/api/v1/trainer/test").hasRole("ADMIN")
                                 .requestMatchers("/api/v1/trainee/changeStatus").hasRole("USER")
                                 .requestMatchers("/api/v1/trainee/profile").hasRole("USER")
                                 .requestMatchers("/api/v1/trainee/cancelTraining").hasRole("USER")

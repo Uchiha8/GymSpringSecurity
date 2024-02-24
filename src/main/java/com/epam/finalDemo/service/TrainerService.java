@@ -8,6 +8,7 @@ import com.epam.finalDemo.dto.request.TrainerTrainingsRequest;
 import com.epam.finalDemo.dto.request.UpdateTrainerProfileRequest;
 import com.epam.finalDemo.dto.response.*;
 import com.epam.finalDemo.repository.TrainerRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -127,11 +128,21 @@ public class TrainerService {
         return true;
     }
 
+    @CircuitBreaker(name = "trainer-service")
     public Schedule getSchedule(String username) {
         Schedule schedule = client.getSchedule(username);
         if (schedule == null) {
             throw new RuntimeException("Trainer with username " + username + " not found");
         }
         return schedule;
+    }
+
+    @CircuitBreaker(name = "trainer-service")
+    public Integer test() {
+        try {
+            return client.test();
+        }catch (Exception e){
+            throw new RuntimeException("Address service is not responding properly");
+        }
     }
 }
