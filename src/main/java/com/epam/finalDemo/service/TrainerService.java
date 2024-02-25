@@ -130,19 +130,11 @@ public class TrainerService {
 
     @CircuitBreaker(name = "trainer-service")
     public Schedule getSchedule(String username) {
-        Schedule schedule = client.getSchedule(username);
-        if (schedule == null) {
-            throw new RuntimeException("Trainer with username " + username + " not found");
-        }
-        return schedule;
-    }
-
-    @CircuitBreaker(name = "trainer-service")
-    public Integer test() {
         try {
-            return client.test();
-        }catch (Exception e){
-            throw new RuntimeException("Address service is not responding properly");
+            return client.getSchedule(username);
+        } catch (Exception e) {
+            throw new RuntimeException("Schedule service is not responding properly");
+
         }
     }
 }
