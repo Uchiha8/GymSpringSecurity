@@ -9,9 +9,14 @@ import com.epam.finalDemo.dto.request.TrainerClientDTO;
 import com.epam.finalDemo.repository.TraineeRepository;
 import com.epam.finalDemo.repository.TrainerRepository;
 import com.epam.finalDemo.repository.TrainingRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jakarta.jms.Queue;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,7 +29,8 @@ public class TrainingService {
     private final TrainingRepository trainingRepository;
     private final TraineeRepository traineeRepository;
     private final TrainerRepository trainerRepository;
-    private final TrainerClient client;
+    private final JmsTemplate jmsTemplate;
+    private final Queue queue;
 
     public Training save(PostTrainingRequest request) {
         if (!traineeRepository.existsByUserUsername(request.traineeUsername())) {
@@ -66,7 +72,15 @@ public class TrainingService {
                 throw new RuntimeException("Trainee with username " + t.getTrainee().getUser().getUsername() + " is assigned to training");
             }
         }
-        client.saveAll(dtoList);
+//        client.saveAll(dtoList);
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            String json = mapper.writeValueAsString(dtoList);
+            jmsTemplate.convertAndSend(queue, json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         trainingRepository.deleteAll(training);
     }
 

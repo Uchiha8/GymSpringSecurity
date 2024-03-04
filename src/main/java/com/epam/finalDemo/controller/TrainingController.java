@@ -7,10 +7,14 @@ import com.epam.finalDemo.dto.request.PostTrainingRequest;
 import com.epam.finalDemo.dto.request.TrainerClientDTO;
 import com.epam.finalDemo.service.TrainingService;
 import com.epam.finalDemo.utils.ValidModule;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.jms.Queue;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +24,8 @@ public class TrainingController {
     private final TrainingService trainingService;
     private final ValidModule validModule;
     private final TrainerClient client;
+    private final JmsTemplate jmsTemplate;
+    private final Queue queue;
 
     @PostMapping("/create")
     @SecurityRequirement(name = "bearerAuth")
@@ -36,7 +42,10 @@ public class TrainingController {
                     .duration(training.getDuration())
                     .actionType(ActionType.CREATE)
                     .build();
-            client.save(trainerClient);
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            String json = mapper.writeValueAsString(trainerClient);
+            jmsTemplate.convertAndSend(queue, json);
             return ResponseEntity.ok("Training created successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
