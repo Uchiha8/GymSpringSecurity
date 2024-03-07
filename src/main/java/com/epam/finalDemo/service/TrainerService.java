@@ -1,6 +1,5 @@
 package com.epam.finalDemo.service;
 
-import com.epam.finalDemo.client.TrainerClient;
 import com.epam.finalDemo.domain.*;
 import com.epam.finalDemo.dto.request.ChangeStatusRequest;
 import com.epam.finalDemo.dto.request.TrainerRegistrationRequest;
@@ -8,8 +7,15 @@ import com.epam.finalDemo.dto.request.TrainerTrainingsRequest;
 import com.epam.finalDemo.dto.request.UpdateTrainerProfileRequest;
 import com.epam.finalDemo.dto.response.*;
 import com.epam.finalDemo.repository.TrainerRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jakarta.jms.Queue;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.jms.annotation.JmsListener;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,7 +28,9 @@ public class TrainerService {
     private final UserService userService;
     private final JwtService jwtService;
     private final TrainingTypeService trainingTypeService;
-    private final TrainerClient client;
+    private final JmsTemplate jmsTemplate;
+    private final Queue queue;
+    private static final Logger logger = LogManager.getLogger(TrainerService.class);
 
     public RegistrationResponse register(TrainerRegistrationRequest request) {
         User user = new User(null, request.firstName(), request.lastName(), null, null, false, Role.ROLE_ADMIN, List.of());
@@ -116,6 +124,7 @@ public class TrainerService {
                 () -> new RuntimeException("Trainer with username " + username + " not found"));
         trainerRepository.delete(trainer);
     }
+    private final List<Schedule> schedules = new ArrayList<>();
 
     public boolean changeStatus(ChangeStatusRequest request) {
         var trainer = trainerRepository.findByUserUsername(request.username()).orElseThrow(
@@ -128,13 +137,28 @@ public class TrainerService {
         return true;
     }
 
-    @CircuitBreaker(name = "trainer-service")
-    public Schedule getSchedule(String username) {
+    @JmsListener(destination = "schedule", id = "1")
+    public void consumeSchedule(String request) {
         try {
-            return client.getSchedule(username);
+            logger.info(request);
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            Schedule schedule = mapper.readValue(request, Schedule.class);
+            if (schedules.stream().anyMatch(s -> s.username().equals(schedule.username()))) {
+                schedules.removeIf(s -> s.username().equals(schedule.username()));
+            }
+            schedules.add(schedule);
         } catch (Exception e) {
-            throw new RuntimeException("Schedule service is not responding properly");
-
+            logger.error("Error while consuming schedule " + e.getMessage());
         }
+    }
+
+    public void getSchedule(String username) {
+        jmsTemplate.convertAndSend(queue, username);
+    }
+
+    @CircuitBreaker(name = "trainer-service")
+    public Schedule test(String username) {
+        return schedules.stream().filter(schedule -> schedule.username().equals(username)).findFirst().orElse(null);
     }
 }

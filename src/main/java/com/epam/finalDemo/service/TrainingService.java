@@ -12,7 +12,6 @@ import com.epam.finalDemo.repository.TrainingRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.jms.Queue;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -73,13 +72,15 @@ public class TrainingService {
             }
         }
 //        client.saveAll(dtoList);
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            String json = mapper.writeValueAsString(dtoList);
-            jmsTemplate.convertAndSend(queue, json);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        for (TrainerClientDTO dto : dtoList) {
+            try {
+                String json = mapper.writeValueAsString(dto);
+                jmsTemplate.convertAndSend(queue, json);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Error while sending message to queue");
+            }
         }
         trainingRepository.deleteAll(training);
     }
