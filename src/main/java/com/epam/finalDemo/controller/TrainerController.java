@@ -102,6 +102,7 @@ public class TrainerController {
         try {
             validModule.getSchedule(username);
             trainerService.getSchedule(username);
+            trainerService.test(username);
             logger.info("Schedule for trainer with username " + username + " returned");
             return ResponseEntity.ok(trainerService.test(username));
         } catch (Exception e) {
