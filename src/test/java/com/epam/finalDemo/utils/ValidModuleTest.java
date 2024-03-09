@@ -507,4 +507,16 @@ public class ValidModuleTest {
         // Then
         assertEquals("Username is required", exception.getMessage());
     }
+
+
+    @Test
+    void testGetSchedule_NullUsername() {
+        String username = null;
+        // When
+        ValidModule validModule = new ValidModule();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> validModule.getSchedule(username));
+
+        // Then
+        assertEquals("Username is required", exception.getMessage());
+    }
 }

@@ -104,6 +104,39 @@ public class TraineeServiceTest {
         assertEquals("Doe", trainerList.lastName());
         assertEquals("Training Type", trainerList.trainingType());
     }
+    @Test
+    void testGetProfileWithNullUsername() {
+        // Given
+        String username = "unknown.doe";
+        Trainee trainee = new Trainee();
+        trainee.setUser(new User(1L, "John", "Doe", "john.doe", "password", true, Role.ROLE_USER, Collections.emptyList()));
+        trainee.setDateOfBirth(new Date());
+        trainee.setAddress("123 Main St");
+        trainee.setTrainings(Collections.singletonList(createTraining()));
+
+        when(traineeRepository.findByUserUsername(username)).thenReturn(Optional.of(trainee));
+
+        // When
+        TraineeProfileResponse response = traineeService.getProfile(username);
+
+        // Then
+        assertNotNull(response);
+        assertEquals("John", response.fistName());
+        assertEquals("Doe", response.lastName());
+        assertEquals(trainee.getDateOfBirth(), response.dateOfBirth());
+        assertEquals(trainee.getAddress(), response.address());
+        assertTrue(response.isActive());
+
+        List<TrainerList> trainerLists = response.trainers();
+        assertNotNull(trainerLists);
+        assertEquals(1, trainerLists.size());
+
+        TrainerList trainerList = trainerLists.get(0);
+        assertEquals("john.doe", trainerList.username());
+        assertEquals("John", trainerList.firstName());
+        assertEquals("Doe", trainerList.lastName());
+        assertEquals("Training Type", trainerList.trainingType());
+    }
 
     private Training createTraining() {
         Trainer trainer = new Trainer();

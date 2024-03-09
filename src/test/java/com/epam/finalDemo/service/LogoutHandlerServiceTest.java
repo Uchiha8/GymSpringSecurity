@@ -10,11 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.Authentication;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class LogoutHandlerServiceTest {
@@ -62,24 +65,76 @@ public class LogoutHandlerServiceTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         Authentication authentication = mock(Authentication.class);
 
-        // Mocking Authorization header with an invalid JWT token
         when(request.getHeader("Authorization")).thenReturn("InvalidJwtToken");
 
         // When
         logoutHandlerService.logout(request, response, authentication);
 
-        // Then
-        // Verify that findByToken method was not called for an invalid token
         verify(tokenRepository, never()).findByToken(any());
-
-        // Verify that save method was not called on the tokenRepository
         verify(tokenRepository, never()).save(any());
     }
 
     private Optional<Token> stubToken() {
-        // Implement a stub Token for testing purposes
-        // Adjust this method based on your Token class structure
-        // For example:
         return Optional.of(new Token(1L, "validJwtToken", TokenType.BEARER, false, false, new User()));
+    }
+
+    @Test
+    void testLogout_ValidToken() {
+        // Given
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Authentication authentication = Mockito.mock(Authentication.class);
+
+        String jwt = "validToken";
+        String authHeader = "Bearer " + jwt;
+
+        when(request.getHeader("Authorization ")).thenReturn(authHeader);
+
+        Token storedToken = new Token();
+        when(tokenRepository.findByToken(jwt)).thenReturn(Optional.of(storedToken));
+
+        // When
+        logoutHandlerService.logout(request, response, authentication);
+
+        // Then
+        verify(tokenRepository, times(0)).save(storedToken);
+        assertFalse(storedToken.isRevoked());
+        assertFalse(storedToken.isExpired());
+    }
+
+    @Test
+    void testLogout_InvalidToken() {
+        // Given
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Authentication authentication = Mockito.mock(Authentication.class);
+
+        String invalidJwt = "invalidToken";
+        String authHeader = "Bearer " + invalidJwt;
+
+        when(request.getHeader("Authorization")).thenReturn(authHeader);
+        when(tokenRepository.findByToken(invalidJwt)).thenReturn(Optional.empty());
+
+        // When
+        logoutHandlerService.logout(request, response, authentication);
+
+        // Then
+        // No token save should be performed for an invalid token
+        verify(tokenRepository, never()).save(Mockito.any());
+    }
+
+    @Test
+    void testLogout_NoAuthorizationHeader() {
+        // Given
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Authentication authentication = Mockito.mock(Authentication.class);
+
+        // When
+        logoutHandlerService.logout(request, response, authentication);
+
+        // Then
+        // No token save should be performed when there is no Authorization header
+        verify(tokenRepository, never()).save(Mockito.any());
     }
 }

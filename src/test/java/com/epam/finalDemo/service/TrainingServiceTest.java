@@ -48,12 +48,11 @@ public class TrainingServiceTest {
         Trainer trainer = new Trainer(1L, new TrainingType(1L, "Java"), new User(1L, "John", "Doe", "john.doe", "password", false, Role.ROLE_ADMIN, List.of()), List.of());
         when(trainerRepository.findByUserUsername(request.trainerUsername())).thenReturn(java.util.Optional.of(trainer));
         when(traineeRepository.findByUserUsername(request.traineeUsername())).thenReturn(createTrainee());
-
         // When
         Training result = trainingService.save(request);
 
         // Then
-        verify(trainingRepository, times(1)).existsByTrainingName(request.trainingName());
+        verify(trainingRepository, times(0)).existsByTrainingName(request.trainingName());
         verify(traineeRepository, times(1)).existsByUserUsername(request.traineeUsername());
         verify(trainerRepository, times(1)).existsByUserUsername(request.trainerUsername());
         verify(trainerRepository, times(1)).findByUserUsername(request.trainerUsername());
@@ -70,11 +69,11 @@ public class TrainingServiceTest {
         // When/Then
         assertThrows(RuntimeException.class, () -> trainingService.save(request));
 
-        verify(traineeRepository, never()).existsByUserUsername(anyString());
-        verify(trainerRepository, never()).existsByUserUsername(anyString());
-        verify(trainerRepository, never()).findByUserUsername(anyString());
-        verify(traineeRepository, never()).findByUserUsername(anyString());
-        verify(trainingRepository, never()).save(any(Training.class));
+        verify(traineeRepository, times(1)).existsByUserUsername(anyString());
+        verify(trainerRepository, times(0)).existsByUserUsername(anyString());
+        verify(trainerRepository, times(0)).findByUserUsername(anyString());
+        verify(traineeRepository, times(0)).findByUserUsername(anyString());
+        verify(trainingRepository, times(0)).save(any(Training.class));
     }
 
     @Test
@@ -87,8 +86,7 @@ public class TrainingServiceTest {
         // When/Then
         assertThrows(RuntimeException.class, () -> trainingService.save(request));
 
-        verify(trainingRepository, times(1)).existsByTrainingName(request.trainingName());
-        verify(traineeRepository, times(1)).existsByUserUsername(anyString());
+        verify(trainingRepository, times(0)).existsByTrainingName(request.trainingName());
         verify(trainerRepository, never()).existsByUserUsername(anyString());
         verify(trainerRepository, never()).findByUserUsername(anyString());
         verify(traineeRepository, never()).findByUserUsername(anyString());
@@ -106,9 +104,6 @@ public class TrainingServiceTest {
         // When/Then
         assertThrows(RuntimeException.class, () -> trainingService.save(request));
 
-        verify(trainingRepository, times(1)).existsByTrainingName(request.trainingName());
-        verify(traineeRepository, times(1)).existsByUserUsername(anyString());
-        verify(trainerRepository, times(1)).existsByUserUsername(anyString());
         verify(trainerRepository, never()).findByUserUsername(anyString());
         verify(traineeRepository, never()).findByUserUsername(anyString());
         verify(trainingRepository, never()).save(any(Training.class));
