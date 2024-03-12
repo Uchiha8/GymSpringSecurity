@@ -1,6 +1,5 @@
 package com.epam.finalDemo.service;
 
-import com.epam.finalDemo.client.TrainerClient;
 import com.epam.finalDemo.domain.Trainer;
 import com.epam.finalDemo.domain.Training;
 import com.epam.finalDemo.dto.request.ActionType;
@@ -71,7 +70,6 @@ public class TrainingService {
                 throw new RuntimeException("Trainee with username " + t.getTrainee().getUser().getUsername() + " is assigned to training");
             }
         }
-//        client.saveAll(dtoList);
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         for (TrainerClientDTO dto : dtoList) {

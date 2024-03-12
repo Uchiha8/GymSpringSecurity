@@ -157,4 +157,15 @@ public class UserServiceTest {
         // Then
         assertNotNull(password);
     }
+
+    @Test
+    void testDoubleUsernameGenerator() {
+        String firstName = "John";
+        String lastName = "Doe";
+        when(userRepository.existsByUsername("john.doe")).thenReturn(true);
+        when(userRepository.existsByUsername("john.doe1")).thenReturn(true);
+        when(userRepository.existsByUsername("john.doe2")).thenReturn(true);
+        String username = userService.usernameGenerator(firstName, lastName);
+        assertNotNull(username);
+    }
 }

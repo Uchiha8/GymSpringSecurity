@@ -2,8 +2,10 @@ package com.epam.finalDemo.service;
 
 import com.epam.finalDemo.domain.*;
 import com.epam.finalDemo.dto.request.ChangeStatusRequest;
+import com.epam.finalDemo.dto.request.TrainerRegistrationRequest;
 import com.epam.finalDemo.dto.request.TrainerTrainingsRequest;
 import com.epam.finalDemo.dto.request.UpdateTrainerProfileRequest;
+import com.epam.finalDemo.dto.response.RegistrationResponse;
 import com.epam.finalDemo.dto.response.TrainerProfileResponse;
 import com.epam.finalDemo.dto.response.TrainerTrainingsResponse;
 import com.epam.finalDemo.dto.response.UpdateTrainerProfileResponse;
@@ -28,12 +30,49 @@ public class TrainerServiceTest {
     private TrainerRepository trainerRepository;
     @Mock
     private TrainingTypeService trainingTypeService;
+    @Mock
+    private UserService userService;
+    @Mock
+    private JwtService jwtService;
     @InjectMocks
     private TrainerService trainerService;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testRegister() {
+        // Arrange
+        TrainerRegistrationRequest request = new TrainerRegistrationRequest("John", "Doe", "TrainingType");
+
+        User registeredUser = new User(1L, "John", "Doe", "john.doe", "password", false, Role.ROLE_ADMIN, List.of());
+        when(userService.register(any(User.class))).thenReturn(registeredUser);
+
+        TrainingType trainingType = new TrainingType(1L, "TrainingType");
+        when(trainingTypeService.findByName("TrainingType")).thenReturn(trainingType);
+
+        Trainer savedTrainer = Trainer.builder()
+                .trainingType(trainingType)
+                .user(registeredUser)
+                .trainings(List.of())
+                .build();
+        when(trainerRepository.save(any(Trainer.class))).thenReturn(savedTrainer);
+
+        String jwtToken = "generatedJwtToken";
+        when(jwtService.generateToken(registeredUser)).thenReturn(jwtToken);
+
+        // Act
+        RegistrationResponse response = trainerService.register(request);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals("john.doe", response.username());
+        assertEquals(UserService.password, response.password());
+        assertEquals(jwtToken, response.token());
+
+        verify(userService, times(1)).savedUserTokens(jwtToken, registeredUser);
     }
 
     @Test
@@ -55,6 +94,51 @@ public class TrainerServiceTest {
         assertEquals(trainer.getTrainingType().getName(), result.trainingType());
         assertEquals(trainer.getUser().getIsActive(), result.isActive());
     }
+
+    @Test
+    void testGetProfileTrainerNotFound() {
+        // Arrange
+        String username = "john.doe";
+        when(trainerRepository.findByUserUsername(username)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> trainerService.getProfile(username));
+    }
+
+    @Test
+    void testGetTrainingTrainerNotFound() {
+        // Arrange
+        String username = "john.doe";
+        TrainerTrainingsRequest trainingsRequest = new TrainerTrainingsRequest(username, new Date(), new Date(), "trainee1");
+        when(trainerRepository.findByUserUsername(username)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> trainerService.getTrainings(trainingsRequest));
+    }
+
+    @Test
+    void testGetTrainingTrainerEmptyList() {
+        // Arrange
+        String username = "john.doe";
+        TrainerTrainingsRequest trainingsRequest = new TrainerTrainingsRequest(username, new Date(), new Date(), "trainee1");
+        Trainer trainer = createTrainer(username);
+        when(trainerRepository.findByUserUsername(username)).thenReturn(Optional.of(trainer));
+
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> trainerService.getTrainings(trainingsRequest));
+    }
+
+    @Test
+    void testUpdateProfileTrainerNotFound() {
+        // Arrange
+        String username = "john.doe";
+        when(trainerRepository.findByUserUsername(username)).thenReturn(Optional.empty());
+        UpdateTrainerProfileRequest request = new UpdateTrainerProfileRequest(username, "John", "Doe", "TrainingType", true);
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> trainerService.updateProfile(request));
+    }
+
 
     @Test
     void testGetTrainings() {

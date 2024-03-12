@@ -21,10 +21,10 @@ public class UpdateTraineeProfileResponseTest {
 
         List<TrainerList> trainers3 = new ArrayList<>();
         trainers3.add(new TrainerList("trainer3", "Bob", "Johnson", "C#"));
-
-        UpdateTraineeProfileResponse response1 = new UpdateTraineeProfileResponse("john.doe", "John", "Doe", new Date(), "123 Main St", true, trainers1);
-        UpdateTraineeProfileResponse response2 = new UpdateTraineeProfileResponse("john.doe", "John", "Doe", new Date(), "123 Main St", true, trainers2);
-        UpdateTraineeProfileResponse response3 = new UpdateTraineeProfileResponse("jane.smith", "Jane", "Smith", new Date(), "456 Oak St", false, trainers3);
+        Date date = new Date();
+        UpdateTraineeProfileResponse response1 = new UpdateTraineeProfileResponse("john.doe", "John", "Doe", date, "123 Main St", true, trainers1);
+        UpdateTraineeProfileResponse response2 = new UpdateTraineeProfileResponse("john.doe", "John", "Doe", date, "123 Main St", true, trainers2);
+        UpdateTraineeProfileResponse response3 = new UpdateTraineeProfileResponse("jane.smith", "Jane", "Smith",date, "456 Oak St", false, trainers3);
 
         assertEquals(response1, response2);
         assertNotEquals(response1, response3);

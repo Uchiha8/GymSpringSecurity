@@ -6,6 +6,7 @@ import com.epam.finalDemo.dto.request.TraineeRegistrationRequest;
 import com.epam.finalDemo.dto.request.UpdateTraineeProfileRequest;
 import com.epam.finalDemo.dto.response.*;
 import com.epam.finalDemo.repository.TraineeRepository;
+import com.epam.finalDemo.repository.TrainingRepository;
 import com.epam.finalDemo.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,8 @@ public class TraineeServiceTest {
     private JwtService jwtService;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private TrainingRepository trainingRepository;
     @Mock
     private TrainingService trainingService;
     @InjectMocks
@@ -246,9 +249,9 @@ public class TraineeServiceTest {
     private Trainee createTrainee(String username) {
         Trainee trainee = new Trainee();
         trainee.setUser(new User(1L, "John", "Doe", username, "password", true, Role.ROLE_USER, Collections.emptyList()));
-        trainee.setDateOfBirth(null); // Set the actual date of birth
+        trainee.setDateOfBirth(null);
         trainee.setAddress("Old Address");
-        trainee.setTrainings(List.of(new Training(1L,trainee,new Trainer(), "Training 1", new TrainingType(1L, "Training Type"), new Date(), Duration.ofHours(1))));
+        trainee.setTrainings(List.of(new Training(1L, trainee, new Trainer(1L, new TrainingType(), new User(1L, "John", "Doe", username, "password", true, Role.ROLE_USER, Collections.emptyList()), List.of()), "Training 1", new TrainingType(1L, "Training Type"), new Date(), Duration.ofHours(1))));
         return trainee;
     }
 
@@ -408,30 +411,4 @@ public class TraineeServiceTest {
             traineeService.delete(request.username());
         });
     }
-
-//    @Test
-//    void testCancelTrainingSuccessfully() {
-//        // Arrange
-//        String username = "existingUsername";
-//        String trainingName = "trainingName";
-//
-//        Trainee existingTrainee = new Trainee();
-//        existingTrainee.setUser(new User());
-//
-//        Training existingTraining = new Training();
-//        existingTraining.setTrainingName(trainingName);
-//        existingTrainee.setTrainings(List.of(existingTraining));
-//
-//        when(traineeRepository.findByUserUsername(username)).thenReturn(Optional.of(existingTrainee));
-//        when(traineeRepository.save(existingTrainee)).thenReturn(existingTrainee);
-//
-//        // Act
-//        List<TraineeTrainingsResponse> result = traineeService.cancelTraining(username, trainingName);
-//
-//        // Assert
-//        verify(trainingService, times(1)).updateTrainingTrainee(existingTraining);
-//        verify(traineeRepository, times(1)).save(existingTrainee);
-//        assertTrue(result.isEmpty()); // Adjust this based on the actual return value of getTrainings(username)
-//    }
-
 }
