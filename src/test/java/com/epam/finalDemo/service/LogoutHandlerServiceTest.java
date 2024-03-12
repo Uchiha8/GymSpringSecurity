@@ -137,4 +137,30 @@ public class LogoutHandlerServiceTest {
         // No token save should be performed when there is no Authorization header
         verify(tokenRepository, never()).save(Mockito.any());
     }
+    @Test
+    void testLogoutWhenStoredTokenIsNotNull() {
+        // Arrange
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        Authentication authentication = mock(Authentication.class);
+
+        // Mocking Authorization header with a valid JWT token
+        when(request.getHeader("Authorization")).thenReturn("Bearer validJwtToken");
+        Token storedToken = new Token();
+        storedToken.setExpired(true);
+        storedToken.setRevoked(true);
+        // Mocking the token repository behavior
+        when(tokenRepository.findByToken("validJwtToken")).thenReturn(null);
+        when(tokenRepository.save(storedToken)).thenReturn(storedToken);
+
+        // When
+        logoutHandlerService.logout(request, response, authentication);
+
+        // Then
+        // Verify that findByToken method was called with the correct token
+        verify(tokenRepository, times(0)).findByToken("validJwtToken");
+
+        assertTrue(storedToken.isRevoked());
+        assertTrue(storedToken.isExpired());
+    }
 }

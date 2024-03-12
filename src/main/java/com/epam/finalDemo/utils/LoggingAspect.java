@@ -28,5 +28,4 @@ public class LoggingAspect {
     public void logAfterException(JoinPoint joinPoint, Exception exception) {
         LOGGER.error("Method {}.{} threw {}. Exception: {}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName(), exception.getClass().getSimpleName(), exception.getMessage());
     }
-
 }

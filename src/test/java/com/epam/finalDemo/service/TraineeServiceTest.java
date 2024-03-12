@@ -31,6 +31,8 @@ public class TraineeServiceTest {
     private JwtService jwtService;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private TrainingService trainingService;
     @InjectMocks
     private TraineeService traineeService;
 
@@ -104,6 +106,22 @@ public class TraineeServiceTest {
         assertEquals("Doe", trainerList.lastName());
         assertEquals("Training Type", trainerList.trainingType());
     }
+
+    @Test
+    void testGetProfileThrowsExceptionWhenTraineeNotFound() {
+        // Arrange
+        String username = "john.doe";
+        Trainee trainee = new Trainee();
+        trainee.setUser(new User(1L, "John", "Doe", "john.doe", "password", true, Role.ROLE_USER, Collections.emptyList()));
+        trainee.setDateOfBirth(new Date());
+        trainee.setAddress("123 Main St");
+        trainee.setTrainings(Collections.singletonList(createTraining()));
+
+        when(traineeRepository.findByUserUsername(username)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> traineeService.getProfile(username));
+
+    }
+
     @Test
     void testGetProfileWithNullUsername() {
         // Given
@@ -211,7 +229,7 @@ public class TraineeServiceTest {
         assertEquals(request.dateOfBirth(), response.dateOfBirth());
         assertEquals(request.address(), response.address());
         assertEquals(request.isActive(), response.isActive());
-        assertFalse(!response.trainers().isEmpty());
+        assertFalse(response.trainers().isEmpty());
     }
 
     private UpdateTraineeProfileRequest createUpdateTraineeProfileRequest() {
@@ -230,8 +248,7 @@ public class TraineeServiceTest {
         trainee.setUser(new User(1L, "John", "Doe", username, "password", true, Role.ROLE_USER, Collections.emptyList()));
         trainee.setDateOfBirth(null); // Set the actual date of birth
         trainee.setAddress("Old Address");
-        trainee.setTrainings(Collections.emptyList()); // Add actual trainings if needed
-
+        trainee.setTrainings(List.of(new Training(1L,trainee,new Trainer(), "Training 1", new TrainingType(1L, "Training Type"), new Date(), Duration.ofHours(1))));
         return trainee;
     }
 
@@ -240,12 +257,9 @@ public class TraineeServiceTest {
         // Given
         String username = "john.doe";
         Trainee trainee = createTrainee(username);
-
         when(traineeRepository.findByUserUsername(username)).thenReturn(Optional.of(trainee));
-
         // When
         traineeService.delete(username);
-
         // Then
         verify(traineeRepository, times(1)).delete(trainee);
     }
@@ -268,4 +282,156 @@ public class TraineeServiceTest {
         verify(traineeRepository, times(1)).save(trainee);
         assertEquals(changeStatusRequest.status(), trainee.getUser().getIsActive());
     }
+
+    @Test
+    void testChangeStatusThrowsExceptionWhenTraineeNotFound() {
+        // Arrange
+        ChangeStatusRequest request = new ChangeStatusRequest("nonexistentUsername", true);
+
+        when(traineeRepository.findByUserUsername(request.username())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> {
+            traineeService.changeStatus(request);
+        });
+    }
+
+    @Test
+    void testChangeStatusThrowsExceptionWhenTraineeAlreadyHasStatus() {
+        // Arrange
+        String username = "existingUsername";
+        Trainee existingTrainee = new Trainee();
+        existingTrainee.setUser(new User());
+        existingTrainee.getUser().setIsActive(true);
+
+        ChangeStatusRequest request = new ChangeStatusRequest(username, true);
+
+        when(traineeRepository.findByUserUsername(request.username())).thenReturn(Optional.of(existingTrainee));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            traineeService.changeStatus(request);
+        });
+
+        assertTrue(exception.getMessage().contains("already has status " + request.status()));
+    }
+
+    @Test
+    void testGetTrainingsThrowsExceptionWhenTraineeNotFound() {
+        // Arrange
+        String username = "nonexistentUsername";
+
+        when(traineeRepository.findByUserUsername(username)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> {
+            traineeService.getTrainings(username);
+        });
+    }
+
+    @Test
+    void testGetTrainingsThrowsExceptionWhenTraineeHasNoTrainings() {
+        // Arrange
+        String username = "existingUsername";
+        Trainee existingTrainee = new Trainee();
+        existingTrainee.setUser(new User());
+        existingTrainee.setTrainings(Collections.emptyList());
+
+        when(traineeRepository.findByUserUsername(username)).thenReturn(Optional.of(existingTrainee));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            traineeService.getTrainings(username);
+        });
+
+        assertTrue(exception.getMessage().contains("has no trainings"));
+    }
+
+    @Test
+    void testCancelTrainingThrowsExceptionWhenTraineeNotFound() {
+        // Arrange
+        String username = "nonexistentUsername";
+        String trainingName = "trainingName";
+
+        when(traineeRepository.findByUserUsername(username)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> {
+            traineeService.cancelTraining(username, trainingName);
+        });
+    }
+
+    @Test
+    void testCancelTrainingThrowsExceptionWhenTraineeHasNoTrainings() {
+        // Arrange
+        String username = "existingUsername";
+        String trainingName = "trainingName";
+
+        Trainee existingTrainee = new Trainee();
+        existingTrainee.setUser(new User());
+        existingTrainee.setTrainings(Collections.emptyList());
+
+        when(traineeRepository.findByUserUsername(username)).thenReturn(Optional.of(existingTrainee));
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> {
+            traineeService.cancelTraining(username, trainingName);
+        });
+    }
+
+    @Test
+    void testUpdateProfileWithNoExistingTrainee() {
+        // Arrange
+        UpdateTraineeProfileRequest request = new UpdateTraineeProfileRequest("nonexistentUsername", "John", "Doe", null, "123 Main St", true);
+
+        when(traineeRepository.findByUserUsername(request.username())).thenReturn(Optional.empty());
+
+        when(traineeRepository.findByUserUsername(request.username())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> {
+            traineeService.updateProfile(request);
+        });
+    }
+
+    @Test
+    void testDeleteProfileWithNoExistingTrainee() {
+        // Arrange
+        UpdateTraineeProfileRequest request = new UpdateTraineeProfileRequest("nonexistentUsername", "John", "Doe", null, "123 Main St", true);
+
+        when(traineeRepository.findByUserUsername(request.username())).thenReturn(Optional.empty());
+
+        when(traineeRepository.findByUserUsername(request.username())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> {
+            traineeService.delete(request.username());
+        });
+    }
+
+//    @Test
+//    void testCancelTrainingSuccessfully() {
+//        // Arrange
+//        String username = "existingUsername";
+//        String trainingName = "trainingName";
+//
+//        Trainee existingTrainee = new Trainee();
+//        existingTrainee.setUser(new User());
+//
+//        Training existingTraining = new Training();
+//        existingTraining.setTrainingName(trainingName);
+//        existingTrainee.setTrainings(List.of(existingTraining));
+//
+//        when(traineeRepository.findByUserUsername(username)).thenReturn(Optional.of(existingTrainee));
+//        when(traineeRepository.save(existingTrainee)).thenReturn(existingTrainee);
+//
+//        // Act
+//        List<TraineeTrainingsResponse> result = traineeService.cancelTraining(username, trainingName);
+//
+//        // Assert
+//        verify(trainingService, times(1)).updateTrainingTrainee(existingTraining);
+//        verify(traineeRepository, times(1)).save(existingTrainee);
+//        assertTrue(result.isEmpty()); // Adjust this based on the actual return value of getTrainings(username)
+//    }
+
 }
