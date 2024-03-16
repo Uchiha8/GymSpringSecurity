@@ -14,6 +14,7 @@ import com.epam.finalDemo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +44,7 @@ public class UserService {
 
     public AuthenticationResponse changePassword(ChangeLoginRequest request) {
         User user = userRepository.findByUsername(request.username()).orElseThrow(() -> new RuntimeException("User not found"));
-        if(user!=null){
+        if (user != null) {
             user.setPassword(passwordEncoder.encode(request.newPassword()));
             userRepository.save(user);
         }
@@ -51,12 +52,16 @@ public class UserService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.username(),
-                        request.password()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.username(),
+                            request.password()
+                    )
+            );
+        } catch (AuthenticationException e) {
+            throw new RuntimeException("Invalid username/password");
+        }
         User user = userRepository.findByUsername(request.username()).orElseThrow(() -> new RuntimeException("User not found"));
         var jwtToken = jwtService.generateToken(user);
         revokeAllTokens(user);

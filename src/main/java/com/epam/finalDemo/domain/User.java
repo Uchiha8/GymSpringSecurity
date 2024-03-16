@@ -32,7 +32,7 @@ public class User implements UserDetails {
     private Boolean isActive;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Token> tokens;
 
     @Override

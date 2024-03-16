@@ -5,6 +5,7 @@ import com.epam.finalDemo.dto.request.ChangeLoginRequest;
 import com.epam.finalDemo.dto.request.RegisterRequest;
 import com.epam.finalDemo.service.UserService;
 import com.epam.finalDemo.utils.ValidModule;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,15 @@ public class AuthenticationController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(userService.authenticate(request));
+        try {
+            return ResponseEntity.ok(userService.authenticate(request));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/changePassword")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> changePassword(@RequestBody ChangeLoginRequest request) {
         try {
             validModule.changePassword(request);

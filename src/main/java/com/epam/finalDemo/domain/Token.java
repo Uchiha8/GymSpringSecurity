@@ -21,7 +21,7 @@ public class Token {
     private TokenType tokenType;
     private boolean expired;
     private boolean revoked;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "user_id")
     private User user;
 }

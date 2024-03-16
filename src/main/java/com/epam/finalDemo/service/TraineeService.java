@@ -137,7 +137,7 @@ public class TraineeService {
         traineeRepository.delete(trainee);
     }
 
-    public boolean changeStatus(ChangeStatusRequest request) {
+    public boolean  changeStatus(ChangeStatusRequest request) {
         var trainee = traineeRepository.findByUserUsername(request.username()).orElseThrow(
                 () -> new RuntimeException("Trainee with username " + request.username() + " not found"));
         if (trainee.getUser().getIsActive() == request.status()) {

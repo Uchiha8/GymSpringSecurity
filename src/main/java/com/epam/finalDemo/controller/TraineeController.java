@@ -50,7 +50,7 @@ public class TraineeController {
         }
     }
 
-    @PatchMapping("/cancelTraining")
+    @PutMapping("/cancelTraining")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> cancelTraining(@RequestParam String username, @RequestParam String trainingName) {
         try {
@@ -65,14 +65,13 @@ public class TraineeController {
     public ResponseEntity<?> updateProfile(@RequestBody UpdateTraineeProfileRequest request) {
         try {
             validModule.updateProfileTrainee(request);
-
             return ResponseEntity.ok(traineeService.updateProfile(request));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @PatchMapping("/changeStatus")
+    @PutMapping("/changeStatus")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> changeStatus(@RequestBody ChangeStatusRequest request) {
         try {
