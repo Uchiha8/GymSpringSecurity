@@ -69,6 +69,7 @@ public class TrainerController {
         }
     }
 
+
     @PatchMapping("/changeStatus")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> changeStatus(@RequestBody ChangeStatusRequest request) {
