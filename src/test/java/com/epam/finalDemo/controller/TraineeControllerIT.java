@@ -33,6 +33,7 @@ public class TraineeControllerIT {
     String port;
     ResponseEntity<?> lastResponse;
 
+
     @Given("The Client is a valid user for trainee operations")
     public void the_client_valid_user_trainee_operations() {
         HttpHeaders headers = new HttpHeaders();
