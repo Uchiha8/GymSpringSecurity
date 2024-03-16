@@ -1,7 +1,9 @@
 package com.epam.finalDemo.dto.request;
 
 import jakarta.persistence.Column;
+import lombok.Builder;
 
+@Builder
 public record UpdateTrainerProfileRequest(
         @Column(nullable = false)
         String username,

@@ -1,10 +1,11 @@
 package com.epam.finalDemo.controller;
 
 import com.epam.finalDemo.domain.TrainingType;
-import com.epam.finalDemo.dto.request.TraineeRegistrationRequest;
-import com.epam.finalDemo.dto.request.TrainerRegistrationRequest;
+import com.epam.finalDemo.dto.request.*;
 import com.epam.finalDemo.dto.response.RegistrationResponse;
 import com.epam.finalDemo.dto.response.TrainerProfileResponse;
+import com.epam.finalDemo.dto.response.UpdateTraineeProfileResponse;
+import com.epam.finalDemo.dto.response.UpdateTrainerProfileResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.And;
@@ -191,5 +192,181 @@ public class TrainerControllerIT {
     @And("The Client Reads trainer profile with invalid username receives a bad response message {string}")
     public void the_client_reads_trainer_profile_with_invalid_username_receives_response_body(String body) {
         Assertions.assertTrue(Objects.requireNonNull(lastResponse.getBody()).toString().contains(body));
+    }
+
+    @When("The Client Updates trainer profile with valid data using url {string}")
+    public void the_client_updates_trainer_profile_with_valid_data(String url) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        RegistrationResponse response = objectMapper.readValue(Objects.requireNonNull(lastResponse.getBody()).toString(), RegistrationResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        headers.set("Authorization", "Bearer " + response.token());
+        UpdateTrainerProfileRequest request = UpdateTrainerProfileRequest.builder()
+                .username(response.username())
+                .firstName("Alice")
+                .lastName("John")
+                .trainingType("Java")
+                .isActive(true)
+                .build();
+        HttpEntity<UpdateTrainerProfileRequest> requestEntity = new HttpEntity<>(request, headers);
+        lastResponse = new RestTemplate().exchange(
+                "http://localhost:" + port + url,
+                HttpMethod.PUT,
+                requestEntity,
+                String.class);
+    }
+
+    @Then("The Client Updates trainer profile with valid data receives a good response status {int}")
+    public void the_client_updates_trainer_profile_with_valid_data_receives_status_code(int status) {
+        Assertions.assertEquals(lastResponse.getStatusCode().value(), status);
+    }
+
+    @And("The Client Updates trainer profile with valid data receives a response message {string}")
+    public void the_client_updates_trainer_profile_with_valid_data_receives_response_body(String body) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        UpdateTrainerProfileResponse response = objectMapper.readValue(Objects.requireNonNull(lastResponse.getBody()).toString(), UpdateTrainerProfileResponse.class);
+        Assertions.assertEquals(response.firstName(), body);
+    }
+
+    @When("The Client Updates trainer profile with invalid data using url {string}")
+    public void the_client_updates_trainee_profile_with_invalid_data(String url) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        RegistrationResponse response = objectMapper.readValue(Objects.requireNonNull(lastResponse.getBody()).toString(), RegistrationResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        headers.set("Authorization", "Bearer " + response.token());
+        UpdateTrainerProfileRequest request = UpdateTrainerProfileRequest.builder()
+                .username("invalid_username")
+                .firstName("Alice")
+                .lastName("John")
+                .trainingType("Java")
+                .isActive(true)
+                .build();
+        HttpEntity<UpdateTrainerProfileRequest> requestEntity = new HttpEntity<>(request, headers);
+        try {
+            lastResponse = new RestTemplate().exchange(
+                    "http://localhost:" + port + url,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    String.class);
+        } catch (Exception e) {
+            lastResponse = ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Then("The Client Updates trainer profile with invalid data receives a bad response status {int}")
+    public void the_client_updates_trainer_profile_with_invalid_data_receives_bad_status_code(int status) {
+        Assertions.assertEquals(lastResponse.getStatusCode().value(), status);
+    }
+
+    @And("The Client Updates trainer profile with invalid data receives a bad response message {string}")
+    public void the_client_updates_trainer_profile_with_invalid_data_receives_response_body(String body) {
+        Assertions.assertTrue(Objects.requireNonNull(lastResponse.getBody()).toString().contains(body));
+    }
+
+    @When("The Client Changes status of trainer with valid username using url {string}")
+    public void the_client_changes_status_of_trainer_with_valid_username(String url) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        RegistrationResponse response = objectMapper.readValue(Objects.requireNonNull(lastResponse.getBody()).toString(), RegistrationResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        headers.set("Authorization", "Bearer " + response.token());
+        ChangeStatusRequest request = ChangeStatusRequest.builder()
+                .username(response.username())
+                .status(true)
+                .build();
+        HttpEntity<ChangeStatusRequest> requestEntity = new HttpEntity<>(request, headers);
+        lastResponse = new RestTemplate().exchange(
+                "http://localhost:" + port + url,
+                HttpMethod.PUT,
+                requestEntity,
+                String.class);
+    }
+
+    @Then("The Client Changes status of trainer with valid username receives a good response status {int}")
+    public void the_client_changes_status_of_trainer_with_valid_username_receives_status_code(int status) {
+        Assertions.assertEquals(lastResponse.getStatusCode().value(), status);
+    }
+
+    @And("The Client Changes status of trainer with valid username receives a response message {string}")
+    public void the_client_changes_status_of_trainer_with_valid_username_receives_response_body(String body) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Boolean response = objectMapper.readValue(Objects.requireNonNull(lastResponse.getBody()).toString(), Boolean.class);
+        Assertions.assertEquals(response, Boolean.parseBoolean(body));
+    }
+
+    @When("The Client Changes status of trainer with invalid username using url {string}")
+    public void the_client_changes_status_of_trainer_with_invalid_username(String url) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        RegistrationResponse response = objectMapper.readValue(Objects.requireNonNull(lastResponse.getBody()).toString(), RegistrationResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        headers.set("Authorization", "Bearer " + response.token());
+        ChangeStatusRequest request = ChangeStatusRequest.builder()
+                .username("invalid_username")
+                .status(true)
+                .build();
+        HttpEntity<ChangeStatusRequest> requestEntity = new HttpEntity<>(request, headers);
+        try {
+            lastResponse = new RestTemplate().exchange(
+                    "http://localhost:" + port + url,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    String.class);
+        } catch (Exception e) {
+            lastResponse = ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Then("The Client Changes status of trainer with invalid username receives a bad response status {int}")
+    public void the_client_changes_status_of_trainer_with_invalid_username_receives_status_code(int status) {
+        Assertions.assertEquals(lastResponse.getStatusCode().value(), status);
+    }
+
+    @And("The Client Changes status of trainer with invalid username receives a bad response message {string}")
+    public void the_client_changes_status_of_trainer_with_invalid_username_receives_response_body(String body) {
+        Assertions.assertTrue(Objects.requireNonNull(lastResponse.getBody()).toString().contains(body));
+    }
+
+//    @When("The Client Deletes trainer with valid username using url {string}")
+//    public void the_client_deletes_trainer_with_valid_username(String url) throws JsonProcessingException {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        RegistrationResponse response = objectMapper.readValue(Objects.requireNonNull(lastResponse.getBody()).toString(), RegistrationResponse.class);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("Content-Type", "application/json");
+//        headers.set("Authorization", "Bearer " + response.token());
+//        lastResponse = new RestTemplate().exchange(
+//                "http://localhost:" + port + url + "?username=" + response.username(),
+//                HttpMethod.DELETE,
+//                new HttpEntity<>(headers),
+//                String.class);
+//    }
+//
+//    @Then("The Client Deletes trainer with valid username receives a good response status {int}")
+//    public void the_client_deletes_trainer_with_valid_username_receives_status_code(int status) {
+//        Assertions.assertEquals(lastResponse.getStatusCode().value(), status);
+//    }
+
+    @When("The Client Deletes trainer with invalid username using url {string}")
+    public void the_client_deletes_trainer_with_invalid_username(String url) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        RegistrationResponse response = objectMapper.readValue(Objects.requireNonNull(lastResponse.getBody()).toString(), RegistrationResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        headers.set("Authorization", "Bearer " + response.token());
+        try {
+            lastResponse = new RestTemplate().exchange(
+                    "http://localhost:" + port + url + "?username=invalid_username",
+                    HttpMethod.DELETE,
+                    new HttpEntity<>(headers),
+                    String.class);
+        } catch (Exception e) {
+            lastResponse = ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Then("The Client Deletes trainer with invalid username receives a bad response status {int}")
+    public void the_client_deletes_trainer_with_invalid_username_receives_status_code(int status) {
+        Assertions.assertEquals(lastResponse.getStatusCode().value(), status);
     }
 }

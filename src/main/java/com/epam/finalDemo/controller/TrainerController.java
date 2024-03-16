@@ -70,7 +70,7 @@ public class TrainerController {
     }
 
 
-    @PatchMapping("/changeStatus")
+    @PutMapping("/changeStatus")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> changeStatus(@RequestBody ChangeStatusRequest request) {
         try {
@@ -89,7 +89,6 @@ public class TrainerController {
         try {
             validModule.delete(username);
             trainerService.delete(username);
-            logger.info("Trainer with username " + username + " deleted");
             return ResponseEntity.ok("Trainer deleted successfully");
         } catch (Exception e) {
             logger.error("Error while deleting trainer with username " + username);

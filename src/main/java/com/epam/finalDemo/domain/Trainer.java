@@ -15,7 +15,7 @@ public class Trainer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.REMOVE,fetch = FetchType.LAZY)
     private TrainingType trainingType;
     @OneToOne(cascade = CascadeType.ALL)
     private User user;
